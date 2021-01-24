@@ -3,19 +3,25 @@ package main
 import "context"
 
 type Trigger struct {
-	in <-chan Event
+	in chan Event
+}
+
+func (t *Trigger) In() chan<- Event {
+	return t.in
 }
 
 type TriggerConfig struct {
 }
 
-func NewTrigger(ctx context.Context, in <-chan Event, config TriggerConfig) *Trigger {
+func NewTrigger(ctx context.Context, config TriggerConfig) *Trigger {
+	in := make(chan Event)
 	t := Trigger{
 		in: in,
 	}
 
 	go func() {
-		wraped := logPipe()(ctx, everyPipe(2)(ctx, in))
+		defer close(in)
+		wraped := logPipe()(ctx, everyPipe(2)(ctx, logPipe()(ctx, in)))
 
 		for {
 			select {
