@@ -1,0 +1,12 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - '3320:3306'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    command: ["mysqld", "--datadir=/var/lib/mysql", "--user=mysql", "--server-id=1", "--log-bin=/var/lib/mysql/mysql-bin.log", "--binlog_do_db=test"]
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
