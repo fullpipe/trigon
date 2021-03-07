@@ -1,0 +1,20 @@
+triggers:
+  # - name: "Log all"
+  #   pipes:
+  #     - ["action_filter", ["insert", "update", "delete"]]
+  #     - ["log"]
+  #     - ["webhook", { url: http://request.bin/asdasd }]
+  # - name: "Debounce log"
+  #   pipes:
+  #     - ["debounce", 5000]
+  #     - ["log"]
+
+  # - name: "Webhook on every 2"
+  #   pipes:
+  #     - ["every", 2]
+  #     - ["webhook", { url: http://request.bin/asdasd }]
+
+  - name: "Post to rabit every 3"
+    pipes:
+      # - ["every", 3]
+      - ["amqp", { dsn: "amqp://guest:guest@localhost:5672/", exchange: "test1", routing_key: "foo" }]

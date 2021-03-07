@@ -14,7 +14,7 @@ type EventHandler struct {
 	canal.DummyEventHandler
 }
 
-func NewHandler(configs []TriggerConfig) *EventHandler {
+func NewHandler(config Config) *EventHandler {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	eh := EventHandler{
@@ -23,7 +23,7 @@ func NewHandler(configs []TriggerConfig) *EventHandler {
 		triggers: []*Trigger{},
 	}
 
-	for _, config := range configs {
+	for _, config := range config.Triggers {
 		eh.triggers = append(eh.triggers, NewTrigger(ctx, config))
 	}
 
@@ -60,5 +60,5 @@ func (h *EventHandler) OnRow(e *canal.RowsEvent) error {
 }
 
 func (h *EventHandler) String() string {
-	return "Trigo event handler"
+	return "Trigon event handler"
 }
