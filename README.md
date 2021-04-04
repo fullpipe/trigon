@@ -2,12 +2,24 @@
 
 Trigon connects to MySQL bin-log stream and processes it with different pipes
 
-## Configuration
+## Install
+
+```bash
+go get -u github.com/fullpipe/trigon
+```
+
+## Usage
+
+```bash
+trigon -config=trigon.yaml
+```
+
+## Configuration with examples
 
 ```yaml
 # trigon.yaml
 input:
-  host: 127.0.0.1:3320
+  host: 127.0.0.1:3320 # mysql host
   user: root
   password: root
 triggers:
