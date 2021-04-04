@@ -1,0 +1,30 @@
+input:
+  host: 127.0.0.1:3320
+  user: root
+  password: root
+triggers:
+  # - name: "Log all"
+  #   pipes:
+  #     - ["action_filter", ["insert", "update", "delete"]]
+
+  #     - ["webhook", { url: http://request.bin/asdasd }]
+  # - name: "Debounce log"
+  #   pipes:
+  #     - ["debounce", 5000]
+  #     - ["log"]
+
+  - name: "Webhook on every 2"
+    pipes:
+      - ["log", { prefix: "Webhook start: ", output: "file", "path": "./log.log" }]
+      - ["table_filter", ["m2"]]
+      - ["action_filter", ["insert", "update", "delete"]]
+      - ["every", 2]
+      - ["debounce", 5000]
+      - ["webhook", { url: https://enetij4in24vavw.m.pipedream.net, method: POST }]
+      - ["amqp", { dsn: "amqp://guest:guest@localhost:5672/", exchange: "test1", routing_key: "foo" }]
+      - ["log", { prefix: "Webhook end: " }]
+
+  # - name: "Post to rabit every 3"
+  #   pipes:
+  #     # - ["every", 3]
+  #     - ["amqp", { dsn: "amqp://guest:guest@localhost:5672/", exchange: "test1", routing_key: "foo" }]

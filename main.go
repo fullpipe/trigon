@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	configPath := flag.String("config", "trigon.yaml", "Path to config file")
+	flag.Parse()
+
+	config := getTriggersConfig(configPath)
 	cfg := canal.NewDefaultConfig()
 	cfg.Addr = "127.0.0.1:3320"
 	cfg.User = "root"
@@ -38,10 +42,10 @@ func main() {
 	c.RunFrom(pos)
 }
 
-func GetTriggersConfig() Config {
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+func getTriggersConfig(configPath *string) Config {
+	yamlFile, err := ioutil.ReadFile(*configPath)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		log.Fatalf("yamlFile.Get err #%v ", err)
 	}
 
 	var config Config
