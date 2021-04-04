@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -22,9 +21,16 @@ type TriggerConfig struct {
 	Pipes []PipeConfig `yaml:"pipes"`
 }
 
+type InputConfig struct {
+	Host     string `yaml:"host"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+}
+
 type PipeConfig []yaml.Node
 
 type Config struct {
+	Input    InputConfig     `yaml:"input"`
 	Triggers []TriggerConfig `yaml:"triggers"`
 }
 
@@ -58,6 +64,14 @@ func NewTrigger(ctx context.Context, config TriggerConfig) *Trigger {
 				}
 
 				wraped = actionFilter(actions)(ctx, wraped)
+			case "table_filter":
+				options := pipeConfig[1]
+				tables := []string{}
+				for _, table := range options.Content {
+					tables = append(tables, table.Value)
+				}
+
+				wraped = tableFilter(tables)(ctx, wraped)
 			case "every":
 				options, err := strconv.ParseInt(pipeConfig[1].Value, 10, 32)
 				if err != nil {
@@ -71,15 +85,19 @@ func NewTrigger(ctx context.Context, config TriggerConfig) *Trigger {
 				}
 				wraped = debouncePipe(int(options))(ctx, wraped)
 			case "log":
-				wraped = logPipe()(ctx, wraped)
+				conf := LogConfig{}
+				if len(pipeConfig) > 1 {
+					pipeConfig[1].Decode(&conf)
+				}
+				wraped = logPipe(conf)(ctx, wraped)
 			case "webhook":
-				// options, ok := pipeConfig[1].([]string)
-				// if !ok {
-				// 	log.Fatal("action_filter options should be array")
-				// }
-				wraped = logPipe()(ctx, wraped)
+				conf := WebhookConfig{}
+				err := pipeConfig[1].Decode(&conf)
+				if err != nil {
+					log.Fatal("conf options should be array")
+				}
+				wraped = webhookPipe(conf)(ctx, wraped)
 			case "amqp":
-				fmt.Println("AMQP")
 				conf := AmqpConfig{}
 				err := pipeConfig[1].Decode(&conf)
 				if err != nil {

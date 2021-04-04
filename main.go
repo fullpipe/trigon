@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"io/ioutil"
-	"log"
 
 	"github.com/siddontang/go-mysql/canal"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,21 +14,19 @@ func main() {
 	flag.Parse()
 
 	config := getTriggersConfig(configPath)
+
 	cfg := canal.NewDefaultConfig()
-	cfg.Addr = "127.0.0.1:3320"
-	cfg.User = "root"
-	cfg.Password = "root"
+	cfg.Addr = config.Input.Host
+	cfg.User = config.Input.User
+	cfg.Password = config.Input.Password
 	cfg.Dump.ExecutionPath = ""
 
-	fmt.Println(cfg)
 	c, err := canal.NewCanal(cfg)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// Register a handler to handle RowsEvent
-	fmt.Println(GetTriggersConfig())
-	eh := NewHandler(GetTriggersConfig())
+	eh := NewHandler(config)
 	defer eh.Close()
 
 	c.SetEventHandler(eh)
@@ -39,6 +37,7 @@ func main() {
 	}
 
 	// Start canal
+	log.Info("Starting from binlog position:", pos)
 	c.RunFrom(pos)
 }
 
